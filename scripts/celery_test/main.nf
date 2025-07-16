@@ -11,7 +11,7 @@
 
 workflow WORKER_TEST {
     main:
-        input_file_ch = channel.fromS3( params.source_s3_paths[0] )
+        input_file_ch = channel.fromPath( params.source_s3_paths[0] )
 
         GREETING_FROM_FILE( input_file_ch )
 }
