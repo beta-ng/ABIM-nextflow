@@ -20,6 +20,8 @@ process GREETING_FROM_FILE {
     tag "Reading user from ${user_file}"
 
     publishDir params.results_s3_path, mode: 'copy'
+    
+    container 'ubuntu:22.04'
 
     input:
         path user_file
@@ -29,16 +31,25 @@ process GREETING_FROM_FILE {
 
     script:
     """
+    set -e
+    
+    apt-get update -qq && apt-get install -y -qq coreutils
+    
     echo "========= S3 Read/Write Test: START ========="
-
+    
+    if [ ! -f "${user_file}" ]; then
+        echo "Error: Input file ${user_file} not found"
+        exit 1
+    fi
+    
     USER_NAME=\$(cat ${user_file})
-
+    
     echo "Successfully read user: '\${USER_NAME}' from S3 path: ${user_file}"
     echo "Simulating some processing..."
     sleep 5
-
+    
     echo "Hello, \${USER_NAME}! Your file was read successfully from S3." > greeting.txt
-
+    
     echo "Process finished at: \$(date)"
     echo "========= S3 Read/Write Test: END ========="
     """
