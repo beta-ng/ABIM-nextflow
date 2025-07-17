@@ -21,7 +21,7 @@ process GREETING_FROM_FILE {
 
     publishDir params.results_s3_path, mode: 'copy'
     
-    container 'ubuntu:22.04'
+    container 'nextflow/nextflow:24.10.9'
 
     input:
         path user_file
