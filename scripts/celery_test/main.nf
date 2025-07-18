@@ -18,7 +18,7 @@ process SIMPLE_ECHO {
 }
 
 
-workflow WORKER_TEST {
+workflow WORKER {
   
   Channel.of('Hello Kubernetes from Nextflow!') | SIMPLE_ECHO | view
 }
