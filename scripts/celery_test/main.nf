@@ -1,18 +1,18 @@
+// File: main.nf (Corrected)
 nextflow.enable.dsl=2
 
 // ====================================================================================
 // Process 1: 从 S3 读取文件名
-// - input: 一个指向 S3 文件的路径 (path)
-// - output: 文件内容被放入一个 Channel
+// - output: 使用 'emit' 关键字命名输出通道
 // ====================================================================================
 process READ_NAME_FROM_S3 {
-    container "ubuntu:22.04" // 这个容器不需要特殊工具，cat 就够了
+    container "ubuntu:22.04"
 
     input:
-    path user_file // Nextflow 会自动处理 S3 路径，将文件拉到工作目录
+    path user_file
 
     output:
-    stdout into name_channel // 将标准输出（即文件内容）发送到 'name_channel'
+    stdout emit: name_ch // 修改点 1: 使用 'emit' 来命名输出
 
     script:
     """
@@ -22,7 +22,6 @@ process READ_NAME_FROM_S3 {
 
 // ====================================================================================
 // Process 2: 打印问候语
-// - input: 从 channel 中接收一个值 (val)
 // ====================================================================================
 process GREET_USER {
     container "ubuntu:22.04"
@@ -39,14 +38,11 @@ process GREET_USER {
     """
 }
 
-
 // ====================================================================================
 // Workflow: 定义工作流
-// - 将参数中定义的 S3 文件路径传入第一个 process
-// - 将第一个 process 的输出通过 Channel 传递给第二个 process
+// - 将一个流程的输出通道 (out) 作为另一个流程的输入
 // ====================================================================================
 workflow WORKER {
-    // 从 params 中获取 S3 文件路径，并将其放入 Channel
     Channel
         .fromPath(params.source_s3_paths)
         .ifEmpty { error "S3 user file path not specified! Please set params.source_s3_paths" }
@@ -54,7 +50,9 @@ workflow WORKER {
     
     // 执行工作流
     READ_NAME_FROM_S3(user_s3_file_ch)
-    GREET_USER(name_channel)
+    
+    // 修改点 2: 显式地将第一个流程的输出(out.name_ch)连接到第二个流程
+    GREET_USER(READ_NAME_FROM_S3.out.name_ch) 
     
     // 打印最终的输出
     GREET_USER.out.view()
