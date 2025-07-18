@@ -48,8 +48,8 @@ process GREET_USER {
 workflow WORKER {
     // 从 params 中获取 S3 文件路径，并将其放入 Channel
     Channel
-        .fromPath(params.user_s3_path)
-        .ifEmpty { error "S3 user file path not specified! Please set params.user_s3_path" }
+        .fromPath(params.source_s3_paths)
+        .ifEmpty { error "S3 user file path not specified! Please set params.source_s3_paths" }
         .set { user_s3_file_ch }
     
     // 执行工作流
