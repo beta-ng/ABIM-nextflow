@@ -46,7 +46,7 @@ process GREET_USER {
 process WRITE_GREETING_TO_S3 {
     // publishDir 指令会自动将 'greeting.txt' 文件上传到 params.results_s3_path
     // mode: 'copy' 表示直接复制，如果目标文件已存在则会覆盖
-    publishDir "${params.results_s3_path}", mode: 'copy'
+    publishDir "${params.results_s3_path}", mode: 'copy', overwrite: true
 
     container "ubuntu:22.04"
 
